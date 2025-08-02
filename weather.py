@@ -1,5 +1,6 @@
 import requests
 
+
 def get_weather_forecast():
     """
     Fetches weather forecast data from api.weather.gov, extracts and prints
@@ -12,20 +13,20 @@ def get_weather_forecast():
         data = response.json()
 
         # 2. Prints the JSON node properties.periods[0].temperature and stores that in a variable temp
-        temp_fahrenheit = data['properties']['periods'][0]['temperature']
-        print(temp_fahrenheit, end="") # Using end="" to avoid newline
+        temp_fahrenheit = data["properties"]["periods"][0]["temperature"]
+        print(temp_fahrenheit, end="")  # Using end="" to avoid newline
 
         # 3. Prints "°F/"
         print("°F/", end="")
 
         # 4. Converts temp to celsius and rounds to int
-        temp_celsius = int((temp_fahrenheit - 32) * 5/9)
+        temp_celsius = int((temp_fahrenheit - 32) * 5 / 9)
 
         # 5. Prints "°C"
         print(f"{temp_celsius}°C", end="")
 
         # 6. Prints the JSON node properties.periods[0].shortForecast
-        short_forecast = data['properties']['periods'][0]['shortForecast']
+        short_forecast = data["properties"]["periods"][0]["shortForecast"]
         print(f" {short_forecast}")
 
     except requests.exceptions.RequestException as e:
@@ -34,6 +35,7 @@ def get_weather_forecast():
         print(f"Error parsing JSON data: Missing key {e}")
     except IndexError as e:
         print(f"Error accessing forecast period: {e}")
+
 
 if __name__ == "__main__":
     get_weather_forecast()

@@ -5,7 +5,22 @@ import requests
 from datetime import datetime
 
 
-def display_weather_forecast(cache_path, cache_timeout, weather_gov, wttr_in):
+def AQI_scale(aqi):
+    if aqi <= 50:
+        return "Good"
+    elif aqi <= 100:
+        return "Moderate"
+    elif aqi <= 150:
+        return "Unhealthy for Sensitive Groups"
+    elif aqi <= 200:
+        return "Unhealthy"
+    elif aqi <= 300:
+        return "Very Unhealthy"
+    else:
+        return "Hazardous"
+
+
+def display_weather_forecast(cache_path, cache_timeout, weather_gov, wttr_in, waqi):
     """
     Fetches weather forecast data from api.weather.gov, extracts and prints
     specific temperature information, and the short forecast.
@@ -38,10 +53,16 @@ def display_weather_forecast(cache_path, cache_timeout, weather_gov, wttr_in):
         short_forecast = data["properties"]["periods"][0]["shortForecast"]
         res += f" {short_forecast}"
 
-        url = "https://wttr.in/" + wttr_in + "?format=, %h, %p&u"
+        url = f"https://wttr.in/{wttr_in}?format=, %h, %p&u"
         response = requests.get(url)
-        response.raise_for_status()  # Raise an exception for HTTP errors (4xx or 5xx)
+        response.raise_for_status()
         res += response.text
+
+        url = "https://api.waqi.info/feed/" + waqi
+        response = requests.get(url)
+        response.raise_for_status()
+        aqi = response.json()["data"]["aqi"]
+        res += f", {aqi} {AQI_scale(aqi)}"
 
         print(res)
 
@@ -85,7 +106,11 @@ if __name__ == "__main__":
     argparser.add_argument(
         "--wttr_in", help="Location for wttr.in (default: '53711')", default="53711"
     )
+    argparser.add_argument(
+        "--waqi",
+        help="URL segment for api.waqi.info (looks like '@5933/?token=aabbccdd')",
+    )
     args = argparser.parse_args()
     display_weather_forecast(
-        args.cache, args.cache_timeout, args.weather_gov, args.wttr_in
+        args.cache, args.cache_timeout, args.weather_gov, args.wttr_in, args.waqi
     )

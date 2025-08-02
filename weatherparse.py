@@ -2,10 +2,10 @@ import argparse
 import os
 import json
 import requests
-import datetime
+from datetime import datetime
 
 
-def display_weather_forecast(cache_path, cache_timeout, weather_gov):
+def display_weather_forecast(cache_path, cache_timeout, weather_gov, wttr_in):
     """
     Fetches weather forecast data from api.weather.gov, extracts and prints
     specific temperature information, and the short forecast.
@@ -16,9 +16,10 @@ def display_weather_forecast(cache_path, cache_timeout, weather_gov):
         if age < float(cache_timeout):
             with open(cache_path) as cache:
                 print(json.load(cache))
+                return
 
-    url = f"https://api.weather.gov/gridpoints/{weather_gov}/forecast"
     try:
+        url = f"https://api.weather.gov/gridpoints/{weather_gov}/forecast"
         response = requests.get(url)
         response.raise_for_status()  # Raise an exception for HTTP errors (4xx or 5xx)
         data = response.json()
@@ -36,6 +37,11 @@ def display_weather_forecast(cache_path, cache_timeout, weather_gov):
         # 6. Prints the JSON node properties.periods[0].shortForecast
         short_forecast = data["properties"]["periods"][0]["shortForecast"]
         res += f" {short_forecast}"
+
+        url = "https://wttr.in/" + wttr_in + "?format=, %h, %p&u"
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an exception for HTTP errors (4xx or 5xx)
+        res += response.text
 
         print(res)
 
@@ -76,5 +82,10 @@ if __name__ == "__main__":
         help="URL segment for api.weather.gov (default: 'MKX/37,61')",
         default="MKX/37,61",
     )
+    argparser.add_argument(
+        "--wttr_in", help="Location for wttr.in (default: '53711')", default="53711"
+    )
     args = argparser.parse_args()
-    display_weather_forecast(args.cache, args.cache_timeout, args.weather_gov)
+    display_weather_forecast(
+        args.cache, args.cache_timeout, args.weather_gov, args.wttr_in
+    )

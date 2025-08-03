@@ -40,8 +40,9 @@ def display_weather_forecast(cache_path, cache_timeout, weather_gov, wttr_in, wa
         data = response.json()
 
         # 2. Prints the JSON node properties.periods[0].temperature and stores that in a variable temp
+        period_name = data["properties"]["periods"][0]["name"]
         temp_fahrenheit = data["properties"]["periods"][0]["temperature"]
-        res = f"{temp_fahrenheit}°F/"
+        res = f"{period_name} {temp_fahrenheit}°F/"
 
         # 4. Converts temp to celsius and rounds to int
         temp_celsius = int((temp_fahrenheit - 32) * 5 / 9)
@@ -62,7 +63,7 @@ def display_weather_forecast(cache_path, cache_timeout, weather_gov, wttr_in, wa
         response = requests.get(url)
         response.raise_for_status()
         aqi = response.json()["data"]["aqi"]
-        res += f", {aqi} {AQI_scale(aqi)}"
+        res += f", AQI {aqi}"
 
         print(res)
 
